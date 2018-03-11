@@ -7,9 +7,11 @@ import caci.bricks.storage.OrderStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class OrderController {
@@ -28,8 +30,8 @@ public class OrderController {
     }
 
     @GetMapping("/order/{orderNumber}")
-    public Order getOrder(@PathVariable int orderNumber) {
-        return orderStorage.fetch(orderNumber);
+    public ResponseEntity<Order> getOrder(@PathVariable int orderNumber) {
+        return buildResponse(orderStorage.fetch(orderNumber));
     }
 
     @GetMapping("/orders")
@@ -38,7 +40,13 @@ public class OrderController {
     }
 
     @PutMapping("/order")
-    public Order updateOrder(@RequestBody UpdateOrderRequest request) {
-        return orderStorage.update(request.getOrderNumber(), request.getQuantity());
+    public ResponseEntity<Order> updateOrder(@RequestBody UpdateOrderRequest request) {
+        return buildResponse(orderStorage.update(request.getOrderNumber(), request.getQuantity()));
+    }
+
+    private static ResponseEntity<Order> buildResponse(Order order) {
+        return Optional.ofNullable(order)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 }

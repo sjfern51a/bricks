@@ -78,7 +78,7 @@ public class OrderControllerMvcTest {
 
         mockMvc.perform(
                 get("/order/{orderNumber}", 1))
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
 
         verify(mockOrderStorage).fetch(1);
@@ -105,7 +105,7 @@ public class OrderControllerMvcTest {
     }
 
     @Test
-    public void put_updatedOrderIsReturned() throws Exception {
+    public void put_existingOrderNumber_updatedOrderIsReturned() throws Exception {
         Order order = new Order(1, 20);
         when(mockOrderStorage.update(1, 20)).thenReturn(order);
         String orderJson = objectMapper.writeValueAsString(order);
@@ -117,6 +117,22 @@ public class OrderControllerMvcTest {
                         .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().json(orderJson));
+
+        verify(mockOrderStorage).update(1, 20);
+        verifyNoMoreInteractions(mockOrderStorage);
+    }
+
+    @Test
+    public void put_invalidOrderNumber_noOrderIsReturned() throws Exception {
+        when(mockOrderStorage.update(1, 20)).thenReturn(null);
+        String requestJson = objectMapper.writeValueAsString(new UpdateOrderRequest(1, 20));
+
+        mockMvc.perform(
+                put("/order")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
 
         verify(mockOrderStorage).update(1, 20);
         verifyNoMoreInteractions(mockOrderStorage);
