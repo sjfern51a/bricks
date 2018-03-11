@@ -25,6 +25,11 @@ public class MapBackedOrderStorage implements OrderStorage {
         return order;
     }
 
+    @Override
+    public Order fetch(int orderNumber) {
+        return orderMap.get(orderNumber);
+    }
+
     private int nextOrderReference() {
         return orderNumber.incrementAndGet();
     }
