@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class OrderController {
 
@@ -27,5 +29,10 @@ public class OrderController {
     @GetMapping("/order/{orderNumber}")
     public Order getOrder(@PathVariable int orderNumber) {
         return orderStorage.fetch(orderNumber);
+    }
+
+    @GetMapping("/orders")
+    public List<Order> listOrders() {
+        return orderStorage.list();
     }
 }

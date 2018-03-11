@@ -14,9 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import java.util.List;
+
+import static org.assertj.core.util.Lists.newArrayList;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -77,5 +78,27 @@ public class OrderControllerMvcTest {
                 get("/order/{orderNumber}", 1))
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
+
+        verify(mockOrderStorage).fetch(1);
+        verifyNoMoreInteractions(mockOrderStorage);
+    }
+
+    @Test
+    public void list_existingOrdersReturned() throws Exception {
+        List<Order> orders = newArrayList(
+            new Order(1, 10),
+            new Order(2, 20),
+            new Order(3, 30)
+        );
+        when(mockOrderStorage.list()).thenReturn(orders);
+        String ordersJson = objectMapper.writeValueAsString(orders);
+
+        mockMvc.perform(
+                get("/orders"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(ordersJson));
+
+        verify(mockOrderStorage).list();
+        verifyNoMoreInteractions(mockOrderStorage);
     }
 }
