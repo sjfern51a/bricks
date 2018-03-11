@@ -3,8 +3,7 @@ package caci.bricks.storage;
 import caci.bricks.model.order.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -28,6 +27,11 @@ public class MapBackedOrderStorage implements OrderStorage {
     @Override
     public Order fetch(int orderNumber) {
         return orderMap.get(orderNumber);
+    }
+
+    @Override
+    public List<Order> list() {
+        return Collections.unmodifiableList(new ArrayList<>(orderMap.values()));
     }
 
     private int nextOrderReference() {

@@ -40,4 +40,20 @@ public class MapBackedOrderStorageTest {
         assertThat(mapBackedOrderStorage.fetch(1234))
                 .isNull();
     }
+
+    @Test
+    public void list_allOrderReturned() throws Exception {
+        Order order1 = mapBackedOrderStorage.create(10);
+        Order order2 = mapBackedOrderStorage.create(20);
+        Order order3 = mapBackedOrderStorage.create(30);
+
+        assertThat(mapBackedOrderStorage.list())
+                .containsExactlyInAnyOrder(order1, order2, order3);
+    }
+
+    @Test
+    public void list_noExistingOrders_emptyListIsReturned() throws Exception {
+        assertThat(mapBackedOrderStorage.list())
+                .isEmpty();
+    }
 }
