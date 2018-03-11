@@ -2,6 +2,7 @@ package caci.bricks.controller;
 
 import caci.bricks.model.order.Order;
 import caci.bricks.model.request.CreateOrderRequest;
+import caci.bricks.model.request.UpdateOrderRequest;
 import caci.bricks.storage.OrderStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import static org.assertj.core.util.Lists.newArrayList;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -99,6 +101,24 @@ public class OrderControllerMvcTest {
                 .andExpect(content().json(ordersJson));
 
         verify(mockOrderStorage).list();
+        verifyNoMoreInteractions(mockOrderStorage);
+    }
+
+    @Test
+    public void put_updatedOrderIsReturned() throws Exception {
+        Order order = new Order(1, 20);
+        when(mockOrderStorage.update(1, 20)).thenReturn(order);
+        String orderJson = objectMapper.writeValueAsString(order);
+        String requestJson = objectMapper.writeValueAsString(new UpdateOrderRequest(1, 20));
+
+        mockMvc.perform(
+                put("/order")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(orderJson));
+
+        verify(mockOrderStorage).update(1, 20);
         verifyNoMoreInteractions(mockOrderStorage);
     }
 }

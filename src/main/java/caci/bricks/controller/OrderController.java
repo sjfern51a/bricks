@@ -2,6 +2,7 @@ package caci.bricks.controller;
 
 import caci.bricks.model.order.Order;
 import caci.bricks.model.request.CreateOrderRequest;
+import caci.bricks.model.request.UpdateOrderRequest;
 import caci.bricks.storage.OrderStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,5 +35,10 @@ public class OrderController {
     @GetMapping("/orders")
     public List<Order> listOrders() {
         return orderStorage.list();
+    }
+
+    @PutMapping("/order")
+    public Order updateOrder(@RequestBody UpdateOrderRequest request) {
+        return orderStorage.update(request.getOrderNumber(), request.getQuantity());
     }
 }
