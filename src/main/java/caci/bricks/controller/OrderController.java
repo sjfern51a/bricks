@@ -3,6 +3,7 @@ package caci.bricks.controller;
 import caci.bricks.model.order.Order;
 import caci.bricks.model.request.CreateOrderRequest;
 import caci.bricks.model.request.UpdateOrderRequest;
+import caci.bricks.model.response.OrderNumberResponse;
 import caci.bricks.storage.OrderStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,8 @@ public class OrderController {
 
     @PostMapping(value = "/order", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Order createOrder(@RequestBody CreateOrderRequest request) {
-        return orderStorage.create(request.getQuantity());
+    public OrderNumberResponse createOrder(@RequestBody CreateOrderRequest request) {
+        return fromOrder(orderStorage.create(request.getQuantity()));
     }
 
     @GetMapping("/order/{orderNumber}")
@@ -40,13 +41,22 @@ public class OrderController {
     }
 
     @PutMapping("/order")
-    public ResponseEntity<Order> updateOrder(@RequestBody UpdateOrderRequest request) {
-        return buildResponse(orderStorage.update(request.getOrderNumber(), request.getQuantity()));
+    public ResponseEntity<OrderNumberResponse> updateOrder(@RequestBody UpdateOrderRequest request) {
+        return buildResponse(
+                fromOrder(orderStorage.update(request.getOrderNumber(), request.getQuantity()))
+        );
     }
 
-    private static ResponseEntity<Order> buildResponse(Order order) {
-        return Optional.ofNullable(order)
+    private static <T> ResponseEntity<T> buildResponse(T body) {
+        return Optional.ofNullable(body)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    private static OrderNumberResponse fromOrder(Order order) {
+        return Optional.ofNullable(order)
+                .map(Order::getOrderNumber)
+                .map(OrderNumberResponse::new)
+                .orElse(null);
     }
 }

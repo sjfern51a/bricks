@@ -3,6 +3,7 @@ package caci.bricks.controller;
 import caci.bricks.model.order.Order;
 import caci.bricks.model.request.CreateOrderRequest;
 import caci.bricks.model.request.UpdateOrderRequest;
+import caci.bricks.model.response.OrderNumberResponse;
 import caci.bricks.storage.OrderStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -42,8 +43,8 @@ public class OrderControllerMvcTest {
     public void post_orderIsCreated() throws Exception {
         int orderedQuantity = 2;
         Order order = new Order(1, orderedQuantity);
-        String orderJson = objectMapper.writeValueAsString(order);
         when(mockOrderStorage.create(orderedQuantity)).thenReturn(order);
+        String orderResponseJson = objectMapper.writeValueAsString(new OrderNumberResponse(order.getOrderNumber()));
         String requestJson = objectMapper.writeValueAsString(new CreateOrderRequest(orderedQuantity));
 
         mockMvc.perform(
@@ -51,7 +52,7 @@ public class OrderControllerMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isCreated())
-                .andExpect(content().json(orderJson));
+                .andExpect(content().json(orderResponseJson, true));
 
         verify(mockOrderStorage).create(orderedQuantity);
         verifyNoMoreInteractions(mockOrderStorage);
@@ -66,7 +67,7 @@ public class OrderControllerMvcTest {
         mockMvc.perform(
                 get("/order/{orderNumber}", 1))
                 .andExpect(status().isOk())
-                .andExpect(content().json(orderJson));
+                .andExpect(content().json(orderJson, true));
 
         verify(mockOrderStorage).fetch(1);
         verifyNoMoreInteractions(mockOrderStorage);
@@ -98,7 +99,7 @@ public class OrderControllerMvcTest {
         mockMvc.perform(
                 get("/orders"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(ordersJson));
+                .andExpect(content().json(ordersJson, true));
 
         verify(mockOrderStorage).list();
         verifyNoMoreInteractions(mockOrderStorage);
@@ -108,7 +109,7 @@ public class OrderControllerMvcTest {
     public void put_existingOrderNumber_updatedOrderIsReturned() throws Exception {
         Order order = new Order(1, 20);
         when(mockOrderStorage.update(1, 20)).thenReturn(order);
-        String orderJson = objectMapper.writeValueAsString(order);
+        String orderResponseJson = objectMapper.writeValueAsString(new OrderNumberResponse(order.getOrderNumber()));
         String requestJson = objectMapper.writeValueAsString(new UpdateOrderRequest(1, 20));
 
         mockMvc.perform(
@@ -116,7 +117,7 @@ public class OrderControllerMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(content().json(orderJson));
+                .andExpect(content().json(orderResponseJson, true));
 
         verify(mockOrderStorage).update(1, 20);
         verifyNoMoreInteractions(mockOrderStorage);
