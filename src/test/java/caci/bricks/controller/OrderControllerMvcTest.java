@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,5 +52,30 @@ public class OrderControllerMvcTest {
 
         verify(mockOrderStorage).create(orderedQuantity);
         verifyNoMoreInteractions(mockOrderStorage);
+    }
+
+    @Test
+    public void get_existingOrderNumber_orderIsReturned() throws Exception {
+        Order order = new Order(1, 10);
+        when(mockOrderStorage.fetch(1)).thenReturn(order);
+        String orderJson = objectMapper.writeValueAsString(order);
+
+        mockMvc.perform(
+                get("/order/{orderNumber}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json(orderJson));
+
+        verify(mockOrderStorage).fetch(1);
+        verifyNoMoreInteractions(mockOrderStorage);
+    }
+
+    @Test
+    public void get_invalidOrderNumber_noOrderReturned() throws Exception {
+        when(mockOrderStorage.fetch(1)).thenReturn(null);
+
+        mockMvc.perform(
+                get("/order/{orderNumber}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
     }
 }
