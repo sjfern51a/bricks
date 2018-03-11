@@ -10,4 +10,6 @@ public interface OrderStorage {
     Order fetch(int orderNumber);
 
     List<Order> list();
+
+    Order update(int orderNumber, int quantity);
 }

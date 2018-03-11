@@ -34,6 +34,18 @@ public class MapBackedOrderStorage implements OrderStorage {
         return Collections.unmodifiableList(new ArrayList<>(orderMap.values()));
     }
 
+    @Override
+    public Order update(int orderNumber, int quantity) {
+        Order existingOrder = fetch(orderNumber);
+        if (existingOrder != null) {
+            Order updatedOrder = new Order(existingOrder.getOrderNumber(), quantity);
+            orderMap.put(updatedOrder.getOrderNumber(), updatedOrder);
+            return updatedOrder;
+        } else {
+            return null;
+        }
+    }
+
     private int nextOrderReference() {
         return orderNumber.incrementAndGet();
     }

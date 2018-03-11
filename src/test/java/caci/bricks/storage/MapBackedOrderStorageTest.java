@@ -1,8 +1,11 @@
 package caci.bricks.storage;
 
 import caci.bricks.model.order.Order;
+import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,5 +58,32 @@ public class MapBackedOrderStorageTest {
     public void list_noExistingOrders_emptyListIsReturned() throws Exception {
         assertThat(mapBackedOrderStorage.list())
                 .isEmpty();
+    }
+
+    @Test
+    public void update_validOrderNumber_orderIsReturned() throws Exception {
+        Order order = mapBackedOrderStorage.create(10);
+        Predicate<Order> isUpdated = o -> o.getOrderNumber() == order.getOrderNumber() && o.getQuantity() == 20;
+        Condition<Order> updatedOrder = new Condition<>(isUpdated, "updated order");
+
+        assertThat(mapBackedOrderStorage.update(order.getOrderNumber(), 20))
+                .is(updatedOrder);
+    }
+
+    @Test
+    public void update_validOrderNumber_updateOrderIsStored() throws Exception {
+        Order order = mapBackedOrderStorage.create(10);
+        Predicate<Order> isUpdated = o -> o.getOrderNumber() == order.getOrderNumber() && o.getQuantity() == 20;
+        Condition<Order> updatedOrder = new Condition<>(isUpdated, "updated order");
+
+        mapBackedOrderStorage.update(order.getOrderNumber(), 20);
+        assertThat(mapBackedOrderStorage.fetch(order.getOrderNumber()))
+                .is(updatedOrder);
+    }
+
+    @Test
+    public void update_invalidOrderNumber_nullIsReturned() throws Exception {
+        assertThat(mapBackedOrderStorage.update(1234, 10))
+                .isNull();
     }
 }
